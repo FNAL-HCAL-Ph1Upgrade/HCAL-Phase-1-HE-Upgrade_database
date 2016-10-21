@@ -1,3 +1,4 @@
+import sqlite3
 from django.shortcuts import render
 from django.views import generic
 import datetime
@@ -5,7 +6,7 @@ from os import listdir, path
 import json
 from sets import Set
 
-from .models import QieCard, Tester, Test, Attempt, Location
+from .models import QieCard, Tester, Test, Attempt, Location, QieShuntParams 
 import custom.filters as filters
 
 # Create your views here.
@@ -50,6 +51,83 @@ def summary(request):
     
     return render(request, 'qie_cards/summary.html', {'cards': cardStat})
 
+
+def calibration(request, card):
+    """ This displays the calibration overview for a card """
+    if len(card) > 7:
+        try:
+            p = QieCard.objects.get(uid__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with unique id " + str(card) + " does not exist")
+    else:
+        try:
+            p = QieCard.objects.get(barcode__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with barcode " + str(card) + " does not exist")
+
+    calibrations = p.qieshuntparams_set.all().order_by("group")
+
+    return render(request, 'qie_cards/calibration.html', {'card': p, 'cals': list(calibrations)})
+
+def calResults(request, card, group):
+    """ This displays the calibration results for a card """
+    if len(card) > 7:
+        try:
+            p = QieCard.objects.get(uid__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with unique id " + str(card) + " does not exist")
+    else:
+        try:
+            p = QieCard.objects.get(barcode__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with barcode " + str(card) + " does not exist")
+    calibration = p.qieshuntparams_set.get(group=group)
+
+    if str(calibration.results) != "default.png":
+        conn = sqlite3.connect(path.join(MEDIA_ROOT, str(calibration.results)))
+        c = conn.cursor()
+        c.execute("select * from qieshuntparams")
+        data = []
+        for item in c:
+            temp = { "id":str(item[0]),
+                     "serial":str(p.barcode),
+                     "qie":str(item[2]),
+                     "capID":str(item[3]),
+                     "range":str(item[4]),
+                     "shunt":str(item[5]),
+                     "date":str(item[7]),
+                     "slope":str(item[8]),
+                     "offset":str(item[9]),
+                    }
+            data.append(temp)
+    return render(request, 'qie_cards/cal_results.html', {'card': p,
+                                                          'data': data,
+                                                         })
+
+def calPlots(request, card, group):
+    """ This displays the calibration plots for a card """
+    if len(card) > 7:
+        try:
+            p = QieCard.objects.get(uid__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with unique id " + str(card) + " does not exist")
+    else:
+        try:
+            p = QieCard.objects.get(barcode__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with barcode " + str(card) + " does not exist")
+    calibration = p.qieshuntparams_set.get(group=group)
+
+    files = []
+
+    if str(calibration.plots) != "default.png" and path.isdir(path.join(MEDIA_ROOT, str(calibration.plots))):
+        for f in listdir(path.join(MEDIA_ROOT, str(calibration.plots))):
+            files.append(path.join(calibration.plots.url, path.basename(f)))
+    else:
+        files.append("No Data!")
+    return render(request, 'qie_cards/cal_plots.html', {'card': p,
+                                                        'plots': files,
+                                                         })
 class TestersView(generic.ListView):
     """ This displays the users and email addresses """
     
@@ -94,13 +172,19 @@ def stats(request):
                      }
 
     return render(request, 'qie_cards/stats.html', statistics)
- 
+
 def detail(request, card):
-    """ This displays details about tests on a card """
-    try:
-        p = QieCard.objects.get(barcode__endswith=card)
-    except QieCard.DoesNotExist:
-        raise Http404("QIE card with barcode " + str(card) + " does not exist")
+    """ This displays the overview of tests for a card """
+    if len(card) > 7:
+        try:
+            p = QieCard.objects.get(uid__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with unique id " + str(card) + " does not exist")
+    else:
+        try:
+            p = QieCard.objects.get(barcode__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with barcode " + str(card) + " does not exist")
 
     tests = Test.objects.all()
     locations = Location.objects.filter(card=p)
@@ -160,6 +244,17 @@ def detail(request, card):
                                                      'status':status,
                                                     })
 
+#class CatalogView(generic.ListView):
+#    """ This displays a list of all QIE cards """
+#    
+#    template_name = 'qie_cards/catalog.html'
+#    context_object_name = 'barcode_list'
+#    def get_queryset(self):
+#        return QieCard.objects.all().order_by('barcode')
+#
+def error(request): 
+    """ This displays an error for incorrect barcode or unique id """
+    return render(request, 'qie_cards/error.html')
 
 class PlotView(generic.ListView):
     """ This displays various plots of data """
@@ -170,10 +265,17 @@ class PlotView(generic.ListView):
         return list(Test.objects.all())
 
 def testDetail(request, card, test):
-    try:
-        qieCard = QieCard.objects.get(barcode__endswith=card)
-    except QieCard.DoesNotExist:
-        raise Http404("QIE card does not exist")
+    """ This displays details about a specific test for a card """
+    if len(card) > 7:
+        try:
+            p = QieCard.objects.get(uid__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with unique id " + str(card) + " does not exist")
+    else:
+        try:
+            p = QieCard.objects.get(barcode__endswith=card)
+        except QieCard.DoesNotExist:
+            raise Http404("QIE card with barcode " + str(card) + " does not exist")
     try:
         curTest = Test.objects.get(name=test)
     except QieCard.DoesNotExist:
@@ -185,20 +287,20 @@ def testDetail(request, card, test):
             attempt.overwrite_pass = not attempt.overwrite_pass
             attempt.save()
     
-    attemptList = list(Attempt.objects.filter(card=qieCard, test_type=curTest).order_by("attempt_number").reverse())
+    attemptList = list(Attempt.objects.filter(card=p, test_type=curTest).order_by("attempt_number").reverse())
     attemptData = []
     for attempt in attemptList:
         data = ""
         if not str(attempt.hidden_log_file) == "default.png":
             inFile = open(path.join(MEDIA_ROOT, str(attempt.hidden_log_file)), "r")
             tempDict = json.load(inFile)
-            if attempt.test_type.abbreviation == "overall pedestal": 
+            if attempt.test_type.abbreviation == "overall pedestal" and "pedResults" in tempDict["TestOutputs"]: 
                 data = tempDict["TestOutputs"]["pedResults"]
-            elif attempt.test_type.abbreviation == "overall charge injection": 
+            elif attempt.test_type.abbreviation == "overall charge injection" and "ciResults" in tempDict["TestOutputs"]: 
                 data = tempDict["TestOutputs"]["ciResults"]
-            elif attempt.test_type.abbreviation == "overall phase scan":
+            elif attempt.test_type.abbreviation == "overall phase scan" and "phaseResults" in tempDict["TestOutputs"]:
                 data = tempDict["TestOutputs"]["phaseResults"]
-            elif attempt.test_type.abbreviation == "overall shunt scan":
+            elif attempt.test_type.abbreviation == "overall shunt scan" and "shuntResults" in tempDict["TestOutputs"]:
                 data = tempDict["TestOutputs"]["shuntResults"]
             elif "ResultStrings" in tempDict:
                 if attempt.test_type.abbreviation in tempDict["ResultStrings"]:
@@ -207,7 +309,7 @@ def testDetail(request, card, test):
 
     firstTest = []
 
-    return render(request, 'qie_cards/testDetail.html', {'card': qieCard,
+    return render(request, 'qie_cards/testDetail.html', {'card': p,
                                                          'test': curTest,
                                                          'attempts': attemptData
                                                          })
@@ -223,7 +325,8 @@ def fieldView(request):
                "igloo_major_ver",
                "igloo_minor_ver",
                "comments",
-               "last location"]
+               "last location",
+               "Card Status"]
     
     fields = []
     for i in range(5):
@@ -233,16 +336,32 @@ def fieldView(request):
                 fields.append(field)
 
 
-    cards = list(QieCard.objects.all())
+    cards = list(QieCard.objects.all().order_by("barcode"))
     items = []
+    # Info for "Card Status"
+    cache = path.join(MEDIA_ROOT, "cached_data/summary.json")
+    infile = open(cache, "r")
+    cardStat = json.load(infile)
+    num_required = len(Test.objects.filter(required=True))
     
-    for card in cards:
+    for i in xrange(len(cards)):
+        card = cards[i]
         item = {}
         item["id"] = card.pk
         item["fields"] = []
         for field in fields:
             if field == "last location":
                 item["fields"].append(card.location_set.all().order_by("date_received").reverse()[0].geo_loc)
+            elif field == "Card Status":
+                if cardStat[i]["num_failed"] != 0:
+                    item["fields"].append("FAILED")
+                elif cardStat[i]["num_passed"] == num_required:
+                    if cardStat[i]["forced"]:
+                        item["fields"].append("GOOD (FORCED)")
+                    else:
+                        item["fields"].append("GOOD")
+                else:
+                    item["fields"].append("INCOMPLETE")
             else:
                 item["fields"].append(getattr(card, field))
 

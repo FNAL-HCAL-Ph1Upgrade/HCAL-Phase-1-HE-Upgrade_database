@@ -1,15 +1,15 @@
-{% extends "qie_cards/base.html" %}
+{% extends "sipm_cards/base.html" %}
 {% block head %}
     <link href="/static/qie_cards/css/catalog.css" rel="stylesheet">
 {% endblock %}
 
-{% block title %}HE QIE Card Test Database{% endblock %}
+{% block title %}HE SiPM Control Cards Database{% endblock %}
 
 {% block catalog %}class="active"{% endblock %}
 
 {% block content %}
 <div class="row" align="left" style="padding-left:50px;">
-	<h3>QIE Card Catalog</h3><br>
+	<h3>SiPM Card Catalog</h3><br>
     <div id="breakLine" style="height:2px;width:25%;background-color:#E74C3C"></div>
 </div>
 <br><br>
@@ -17,15 +17,15 @@
 <div class="row" style="padding-left:50px;padding-right:50px">
     <div class="splitColumns">
       <ul>
-{% if barcode_list %}
+{% if sipm_list %}
 <div class="row">
 	<div align="center"><ul>
-	{% for card in barcode_list %}
-  		<li style="font-size:18px"><a href="{{card.barcode}}/">{{card.barcode}}</a></li>
+	{% for module in sipm_list %}
+        <li style="font-size:18px"><a href={{module.sipm_control_card}}>{{module.sipm_control_card}}</a></li>
 	{%endfor%}
 	</ul></div>
 </div>
 {% else %}
-<h1>This database contains no QIE cards.</h1>
+<h1>This database contains no SiPM control cards.</h1>
 {% endif %}
 {% endblock %}
