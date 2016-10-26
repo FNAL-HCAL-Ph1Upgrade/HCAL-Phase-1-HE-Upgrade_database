@@ -1,5 +1,9 @@
 # CMS-QIE_database
-A web-framework for the CMS HE Phase 1 Upgrade database.
+A web-framework for the CMS HE Phase 1 Upgrade database. Initial QIE Card testing was performed at Fermilab, Summer 2016.
+1. Firmware programming of Bridge and Igloo Field Programable Gate Arrays (FPGA).
+2. Quality control (QC) tests of read/writes to all registers and micro HCAL Trigger and Readout (uHTR) tests.
+3. Calibration of QIE Chips using DC current charge injection.
+# Reaout Box (RBX)
 ## Readout Modules (RM)
 There are 4 Reaout Modules (RM) per Readout Box (RBX). Each RM contains 4 QIE Cards and 1 SiPM Control Card. Thus each RM has 48 QIE Chips, 48 channels, 8 fibers, and 48 Bias Voltages (BV). 
 ## QIE Cards
