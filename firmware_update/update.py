@@ -62,12 +62,15 @@ def main():
         bridge_fw_list = []
         igloo_fw_list = []
         rm_count = 0
+        loc_count = 0
         for i in xrange(1,5):
             b_fw = []
             i_fw = []
             try:
+                # RM UID from RBX Run 
                 uid = data["{0}_{1}_RMID".format(rbx,i)]
                 try:
+                    # Get RM from database using UID from RBX Run
                     rm = readMods.get(rm_uid=uid)
                     rm_uid_list.append(uid)
                     rm_list.append(rm)
@@ -83,11 +86,13 @@ def main():
             except KeyError:
                 print "RM_{0}: Not found in rbx run file".format(i)
         for i, rm in enumerate(rm_list):
-            # Initial Location and Firmware 
-            current_location = RmLocation.objects.filter(rm=rm).order_by("date_received").reverse()[0].geo_loc
-            installed = current_location.split(" ")[0] == "Installed"
+            # RM Number 
             print "\nRM {0}".format(rm)
-            print "RM Location: {0}".format(current_location)
+            # Previous and Current Location
+            previous_location = RmLocation.objects.filter(rm=rm).order_by("date_received").reverse()[0].geo_loc
+            current_location = "Installed in RBX {0} RM-Slot {1} for B904 Burn-In".format(rbx, rm_slot_list[i])
+            print "Previous Location: {0}".format(previous_location)
+            # Previous Firmware
             print "Previous Firmware"
             printRMFW(rm)
             card_list = [rm.card_1, rm.card_2, rm.card_3, rm.card_4]
@@ -97,16 +102,17 @@ def main():
                 updateBridge(card, b_fw)
                 updateIgloo(card, i_fw)
             
-            if not installed:
-                RmLocation.objects.create(geo_loc="Installed in RBX {0} RM-Slot {1} for B904 Burn-In".format(rbx, rm_slot_list[i]), rm=rm)
+            if previous_location != current_location:
+                RmLocation.objects.create(geo_loc=current_location, rm=rm)
+                loc_count += 1
             
             # Updated Location and Firmware 
             current_location = RmLocation.objects.filter(rm=rm).order_by("date_received").reverse()[0].geo_loc
-            print "RM Location: {0}".format(current_location)
-            print "Updated Firmware"
+            print "Current Location: {0}".format(current_location)
+            print "Current Firmware"
             printRMFW(rm)
             rm_count += 1
-        return rm_count
+        return (loc_count, rm_count)
     
     else:
         print "Please provide file name."
@@ -114,6 +120,7 @@ def main():
 
 if __name__ == "__main__":
     result = main()
-    print "\nFirmware Updated for {0} Readout Modules\n".format(result)
+    print "\nLocation Updated for {0} Readout Modules".format(result[0])
+    print "Firmware Updated for {0} Readout Modules\n".format(result[1])
 
 

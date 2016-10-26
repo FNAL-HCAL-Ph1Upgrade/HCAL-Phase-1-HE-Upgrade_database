@@ -26,7 +26,7 @@ class QieAdmin(admin.ModelAdmin):
     """ Provides the layout for QieCard editing """
     
     fieldsets = [
-        ('QIE information', {'fields': ['barcode', 'uid', 'bridge_major_ver', 'bridge_minor_ver', 'bridge_other_ver', 'igloo_major_ver', 'igloo_minor_ver', 'comments']}),
+        ('QIE information', {'fields': ['barcode', 'readout_module', 'readout_module_slot', 'uid', 'bridge_major_ver', 'bridge_minor_ver', 'bridge_other_ver', 'igloo_major_ver', 'igloo_minor_ver', 'comments']}),
     ]
     
     inlines = [AttemptInLine, LocationsInLine]

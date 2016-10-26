@@ -22,7 +22,7 @@ with open('/home/django/testing_database/rm_update/table.txt','w') as t:
             rmZeros.append(rm)
         line = "RM_No. {:5d} RM_UID {:27s} {:3s}".format(rm, uid, look)
         t.write(line + '\n')
-        #print line
+        print line
 t.close()
 
 # List RMs with zeros
