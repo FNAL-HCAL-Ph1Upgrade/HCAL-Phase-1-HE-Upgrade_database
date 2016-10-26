@@ -1,8 +1,8 @@
 # CMS-QIE_database
 A web-framework for the CMS HE Phase 1 Upgrade database. Initial QIE Card testing was performed at Fermilab, Summer 2016.
-### Firmware programming of Bridge and Igloo Field Programable Gate Arrays (FPGA).
-### Quality control (QC) tests of read/writes to all registers and micro HCAL Trigger and Readout (uHTR) tests.
-### Calibration of QIE Chips using DC current charge injection.
+#### 1. Firmware programming of Bridge and Igloo Field Programable Gate Arrays (FPGA).
+#### 2. Quality control (QC) tests of read/writes to all registers and micro HCAL Trigger and Readout (uHTR) tests.
+#### 3. Calibration of QIE Chips using DC current charge injection.
 # Reaout Box (RBX)
 Each Readout Box (RBX) contains 4 Readout Modules (RM), 16 QIE Cards, 4 SiPM Control Cards, and 1 Calibration Unit (CU).
 Each RBX has 8 MTP cabels, 32 fibers, 192 channels, 192 Silicon Photomultipliers (SiPM), and 192 Bias Voltages (BV).
