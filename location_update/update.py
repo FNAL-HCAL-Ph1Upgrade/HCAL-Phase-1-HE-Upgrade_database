@@ -11,6 +11,7 @@ django.setup()
 
 from qie_cards.models import QieCard, Location, ReadoutModule, RmLocation
 
+# Update QIE Card locations with RM locations
 def setQieCardLocations():
     start_time = time.time()
     
@@ -60,5 +61,6 @@ def setRMLocations():
     print "Update RM locations run time: {0}".format(end_time - start_time)
 
 if __name__=="__main__":
+    setRMLocations()
     setQieCardLocations()
 

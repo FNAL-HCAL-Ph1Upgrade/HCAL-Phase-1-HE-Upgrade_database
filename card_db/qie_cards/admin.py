@@ -113,9 +113,16 @@ class CUAdmin(admin.ModelAdmin):
         ("Upload", {'fields':['upload']}),
         ]
 
-    list_diplay = ('cu_number',)
+    list_display = ('cu_number',)
     ordering = ('cu_number',)
     searchfields = ('cu_number')
+
+class SipmAdmin(admin.ModelAdmin):
+    """ Provides the layout for SiPM Control Card editing. """
+
+    list_display = ('sipm_control_card',)
+    ordering = ('sipm_control_card',)
+    searchFields = ('sipm_control_card')
 
 # Registration of the models
 admin.site.register(QieCard, QieAdmin)
@@ -125,4 +132,4 @@ admin.site.register(RMBiasVoltage)
 admin.site.register(Test, TestAdmin)
 admin.site.register(ReadoutModule, ReadoutAdmin)
 admin.site.register(CalibrationUnit, CUAdmin)
-admin.site.register(SipmControlCard)
+admin.site.register(SipmControlCard, SipmAdmin)

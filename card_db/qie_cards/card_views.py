@@ -200,7 +200,7 @@ def detail(request, card):
             return render(request, 'qie_cards/error.html')
 
     """ A script will update Readout Modules every hour. """
-    p.update_readout_module()
+    #p.update_readout_module()
     if p.readout_module < 0:
         rm = "Not Installed"
     else:
@@ -345,6 +345,7 @@ def testDetail(request, card, test):
 def fieldView(request):
     """ This displays details about tests on a card """ 
     options = ["barcode",
+               "readout_module",
                "uid",
                "bridge_major_ver",
                "bridge_minor_ver",
@@ -400,4 +401,5 @@ def fieldView(request):
         items.append(item)
 
     return render(request, 'qie_cards/fieldView.html', {'fields': fields, "items": items, "options": options})
+
 

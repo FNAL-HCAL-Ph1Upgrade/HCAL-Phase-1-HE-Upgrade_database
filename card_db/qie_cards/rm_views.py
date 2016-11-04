@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views import generic
+from os import path
+import json
 
-from .models import ReadoutModule, RmLocation
+from .models import ReadoutModule, RmLocation, RMBiasVoltage, QieCard, Test
 
 # Create your views here.
 
@@ -53,16 +55,109 @@ def detail(request, rm):
             RmLocation.objects.create(geo_loc=request.POST.get("location"), rm=readoutMod)
 
     """ Hopefully a script will update Readout Modules every hour. """
-    readoutMod.update()
+    #readoutMod.update()
 
     locations = RmLocation.objects.filter(rm=readoutMod)
+    try:
+        biasVolts = RMBiasVoltage.objects.get(readout_module=readoutMod)
+    except RMBiasVoltage.DoesNotExist:
+        biasVolts = ""
 
     return render(request, 'readout_modules/detail.html', {'rm': readoutMod,
-                                                           'locations': locations
+                                                           'locations': locations,
+                                                           'bv' : biasVolts,
                                                           })
 
 
 def error(request): 
     """ This displays an error for incorrect barcode or unique id """
     return render(request, 'readout_modules/error.html')
+
+def fieldView(request):
+    """ This displays details about tests on a card """ 
+    options = ["rm_number",
+               "rm_uid",
+               "card_1",
+               "card_2",
+               "card_3",
+               "card_4",
+               "card_1.status",
+               "card_2.status",
+               "card_3.status",
+               "card_4.status",
+               "card_1.uid",
+               "card_2.uid",
+               "card_3.uid",
+               "card_4.uid",
+               "card_1.b_fw",
+               "card_2.b_fw",
+               "card_3.b_fw",
+               "card_4.b_fw",
+               "card_1.i_fw",
+               "card_2.i_fw",
+               "card_3.i_fw",
+               "card_4.i_fw",
+               "comments",
+               "last location"]
+    
+    fields = []
+    for i in range(6):
+        if(request.POST.get('field' + str(i+1))):
+            field = request.POST.get('field' + str(i+1))
+            if field in options:
+                fields.append(field)
+
+
+    rms = list(ReadoutModule.objects.all().order_by("rm_number"))
+    cards = list(QieCard.objects.all().order_by("barcode"))
+    locs = RmLocation.objects.all().order_by("rm")
+    items = []
+    # Info for "Card Status"
+    cache = path.join(MEDIA_ROOT, "cached_data/summary.json")
+    infile = open(cache, "r")
+    cardStat = json.load(infile)
+    infile.close()
+    num_required = len(Test.objects.filter(required=True))
+    
+    for i in xrange(len(rms)):
+        rm = rms[i]
+        item = {}
+        item["id"] = rm.pk
+        item["fields"] = []
+        for field in fields:
+            f_list = field.split(".")
+            if field == "last location":
+                loc_list = locs.filter(rm=rm).order_by("date_received")
+                if len(loc_list) == 0:
+                    item["fields"].append("No Locations Recorded")
+                else:
+                    #item["fields"].append(len(card.location_set.all()))
+                    item["fields"].append(loc_list.reverse()[0].geo_loc)
+            elif f_list[-1] == "status":
+                card = getattr(rm, f_list[0])
+                j = cards.index(card)
+                #item["fields"].append("how ya doin?")
+                if cardStat[j]["num_failed"] != 0:
+                    item["fields"].append("FAILED")
+                elif cardStat[j]["num_passed"] == num_required:
+                    if cardStat[j]["forced"]:
+                        item["fields"].append("GOOD (FORCED)")
+                    else:
+                        item["fields"].append("GOOD")
+                else:
+                    item["fields"].append("INCOMPLETE")
+            elif field[-2:] == "fw":
+                card = getattr(rm, f_list[0])
+                firmware = f_list[1]
+                if firmware == "b_fw":
+                    item["fields"].append(card.get_bridge_ver_hex())
+                elif firmware == "i_fw":
+                    item["fields"].append(card.get_igloo_ver_hex())
+            else:
+                item["fields"].append(getattr(rm, field))
+
+        items.append(item)
+
+    return render(request, 'readout_modules/fieldView.html', {'fields': fields, "items": items, "options": options})
+
 

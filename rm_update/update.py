@@ -26,7 +26,7 @@ log.close()
 
 # Output Readout Module json file
 with open('/home/django/testing_database/rm_update/rm.json', 'w') as j:
-    json.dump(rm_dict, j)
+    json.dump(rm_dict, j, sort_keys=True, indent=4)
 j.close()
 
 print "Update run time: {0}".format(end_time - start_time)
