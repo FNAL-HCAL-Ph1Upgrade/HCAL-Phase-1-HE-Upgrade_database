@@ -34,8 +34,22 @@ dest=$backupPath$(date +$dtFormat)  # name of the compressed backup file
 tar -zcf $dest.tar.gz -C $mediaPath $media -C $commonPath card_db --exclude .git --exclude .gitignore
 
 ###################################################
+#            Delete old DB backups                #
+###################################################
+
+numBack=$(($(ls -l $backupPath | wc -l) - 1))   # number of backups
+expTime=24                                      # expiration time (days)
+findOpt="-mtime +$expTime -delete"              # options for find command
+if (( $numBack > 24 ))
+  then
+    # Delete any files which have expired
+    find $backupPath $findOpt
+fi
+
+###################################################
 #                  Network Backup                 #
 ###################################################
 
 # Backup local files to remote backup location
-rsync -a $backupPath $remoteSSH:$remoteBackup
+# Note: This deletes any extra DB backups on the remote location
+rsync -a --delete $backupPath $remoteSSH:$remoteBackup

@@ -80,6 +80,7 @@ class Tester(models.Model):
     username    = models.CharField(max_length=100, default="", unique=True)     # The full name of the tester
     email       = models.EmailField(max_length=255)                             # The email address of the tester
     affiliation = models.CharField('Affiliation', max_length=200, default="")   # The university/lab affiliation of the tester
+    color       = models.CharField('Color', max_length=100, default="")         # The color designation of the tester (blue is the best!)
 
     def __str__(self):
        return self.username
@@ -95,8 +96,9 @@ class QieCard(models.Model):
     bridge_other_ver    = models.CharField(max_length=8, default="", blank=True)    # The other version of the Bridge FPGA
     igloo_major_ver     = models.CharField(max_length=4, default="", blank=True)    # The major version of the IGLOO FPGA
     igloo_minor_ver     = models.CharField(max_length=4, default="", blank=True)    # The minor version of the IGLOO FPGA
-    readout_module      = models.IntegerField('RM №', default=-1)                   
-    readout_module_slot = models.IntegerField('RM Slot', default=-1)                
+    readout_module      = models.IntegerField('RM №', default=-1)                   # The readout module that the QIE Card is installed (if applicable)
+    readout_module_slot = models.IntegerField('RM Slot', default=-1)                # The readout module slot (1-4) that the QIE Card is installed (if applicable)
+    calibration_unit    = models.IntegerField('CU №', default=-1)                   # The calibration unit in which the QIE Card is installed (if applicable)
     comments            = models.TextField(max_length=MAX_COMMENT_LENGTH, blank=True, default="")   # Any comments pertaining to the
                                                                                                     # testing/appearance of the card
 
@@ -124,6 +126,10 @@ class QieCard(models.Model):
                 self.save()
                 break
 
+    def get_location(self):
+        q_loc = Location.objects.filter(card=self).order_by("date_received")
+        current_loc = q_loc.reverse()[0].geo_loc
+        return current_loc
 
     def get_uid_split(self):
         """ Parses the raw UID into split form (first 4 bytes, last 4 bytes) """
@@ -199,6 +205,11 @@ class QieCard(models.Model):
 
     def __str__(self):
        return str(self.barcode)
+
+    def __iter__(self):
+        for field in self._meta.get_fields():
+            value = getattr(self, field.name, None)
+            yield (field.name, value)
 
 
 def images_location(upload, original_filename):
@@ -297,7 +308,7 @@ class ReadoutModule(models.Model):
     date        = models.DateTimeField('Date Received', default=timezone.now)   # The date on which the RM was received
     rm_number   = models.IntegerField('RM №', default=-1)                       # The number of the RM
     card_pack_number    = models.IntegerField('CardPack №', default=-1)         # The cardpack number of the RM
-    rm_uid  = models.CharField(max_length=27, blank=True, default="")           # The data from the UID chip on the RM
+    rm_uid  = models.CharField(max_length=27, blank=True, default="")           # The RM UID created from the UIDs of the 4 QIE cards in the RM
     card_1  = models.ForeignKey(QieCard, verbose_name='QIE card 1 №', related_name="rm_1", on_delete=models.PROTECT)    # The QIE Card in Slot 1 of the RM 
     card_2  = models.ForeignKey(QieCard, verbose_name='QIE card 2 №', related_name="rm_2", on_delete=models.PROTECT)    # The QIE Card in Slot 2 of the RM
     card_3  = models.ForeignKey(QieCard, verbose_name='QIE card 3 №', related_name="rm_3", on_delete=models.PROTECT)    # The QIE Card in Slot 3 of the RM
@@ -348,8 +359,19 @@ class ReadoutModule(models.Model):
         self.card_4.readout_module_slot = 4
         self.card_4.save()
 
+    def get_location(self):
+        r_loc = RmLocation.objects.filter(rm=self).order_by("date_received")
+        current_loc = r_loc.reverse()[0].geo_loc
+        return current_loc
+
     def __str__(self):
         return str(self.rm_number)
+
+    def __iter__(self):
+        for field in self._meta.get_fields():
+            value = getattr(self, field.name, None)
+            yield (field.name, value)
+
 
 class RMBiasVoltage(models.Model):
     readout_module = models.ForeignKey(ReadoutModule, on_delete=models.CASCADE, default=1)
@@ -428,7 +450,17 @@ class CalibrationUnit(models.Model):
     reference_cable_connected = models.BooleanField('Reference Cable Conncected', default=False)                # Confirmation that the Reference Cable is connected
     qc_complete      = models.BooleanField('QC Complete', default=False)                                        # Confirmation that Quality Control has been completed for the CU
     upload           = models.FileField('QC Data File', upload_to='cu_calibration/', default='default.png')     # Uploaded Quality Control data file for CU
+    comments         = models.TextField(max_length=MAX_COMMENT_LENGTH, blank=True, default="")                  # Comments for a Calibration Unit
 
+    def update_qie_card(self):
+        self.qie_card.calibration_unit = self.cu_number
+        self.qie_card.save()
+
+    def get_location(self):
+        c_loc = CuLocation.objects.filter(cu=self).order_by("date_received")
+        current_loc = c_loc.reverse()[0].geo_loc
+        return current_loc
+    
     def __str__(self):
         return str(self.cu_number)
 
@@ -479,6 +511,13 @@ class RmLocation(models.Model):
     rm = models.ForeignKey(ReadoutModule, on_delete=models.CASCADE)              # The RM which the location refers to
     date_received = models.DateTimeField('date received', default=timezone.now)  # The date the RM was received at this location
     geo_loc = models.CharField('Location', max_length=200, default="")           # The geographic location of the RM
+
+class CuLocation(models.Model):
+    """ This model stores information about Calibration Unit location history """
+
+    cu = models.ForeignKey(CalibrationUnit, on_delete=models.CASCADE)            # The CU which the location refers to
+    date_received = models.DateTimeField('date received', default=timezone.now)  # The date the CU was received at this location
+    geo_loc = models.CharField('Location', max_length=200, default="")           # The geographic location of the CU  
 
 # An appendage to the save function
 from django.dispatch import receiver

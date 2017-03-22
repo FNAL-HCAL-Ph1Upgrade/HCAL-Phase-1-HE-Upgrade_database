@@ -17,3 +17,37 @@ There are 4 QIE Cards per Readout Module (RM) and 16 QIE Cards per Readout Box (
 There is 1 SiPM Control Card per Readout Module (RM) and 4 SiPM Control Cards per Readout Box (RBX). Each SiPM Control Card has 48 channels and 48 Bias Voltages (BV) for 48 Silicon Photomultipliers (SiPM).
 ## Calibrations Units (CU)
 There is 1 Calibration Unit (CU) per Readout Box (RBX). Each CU contains 1 Pulser Board and 1 QIE Card.
+
+
+### Here is a list of various database uploading scripts for adding or modifying information.
+
+#### backup                      
+Stores 2-hourly, daily, and weekly backups - these are rsync'd to cmshcal12.
+#### bv_uploader                 
+Uploads bias voltage measurements for SiPMs in RM.
+#### cal_uploader
+Upload QIE card calibrations done at FNAL.
+#### card_db
+The main database directory.
+#### csv_files
+Generates CSV files from database.
+#### db_edits
+Database edits.
+#### firmware_update
+Update QIE card firmware using RBXLogger output dictionary.
+#### LICENSE
+License.
+#### location_update
+Update locations of QIE cards based on CU and RM locations.
+#### media
+Stores beaucoup data.
+#### query
+Ask the database a question... and get an answer!
+#### rm_update
+Set RM and CU unique ids based on QIE card unique ids.
+#### sipm_control_uploader
+Upload SiPM Control Card calibrations. One set is from Mandakini, and another set is from CERN B904.
+#### uploader
+Upload FNAL test results to the database.
+#### web_update
+Store a cached version of the website every hour.

@@ -39,7 +39,7 @@ tar -zcf $dest.tar.gz -C $mediaPath $media --exclude media/callibration -C $comm
 ###################################################
 
 numBack=$(($(ls -l $backupPath | wc -l) - 1))   # number of backups
-expTime=2820                                    # expiration time (seconds)
+expTime=2820                                    # expiration time (minutes)
 findOpt="-mmin +$expTime -delete"               # options for find command
 if (( $numBack > 24 ))
   then

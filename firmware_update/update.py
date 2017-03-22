@@ -41,28 +41,32 @@ def updateIgloo(card, fw):
     card.igloo_minor_ver = "0x" + i_fw[1][-1:].zfill(2)
     card.save()
 
-def main():
-    # Enter an rbx run file to process 
-    if len(sys.argv) == 2:
-        fileName = sys.argv[1]
+# Process files in directory
+def process(directory):
+    readMods = ReadoutModule.objects.all()
+    qieCards = QieCard.objects.all()
+    file_list = []
+    rm_count = 0
+    loc_count = 0
+    for subdir, dirs, files in os.walk(directory):
+        for f in files:
+            file_list.append(os.path.join(subdir,f))
+    for fileName in file_list:
+        # Process File 
         rbx = fileName[-2:]
         rbx = str(int(rbx))
-        print "File: {0}".format(fileName)
+        print "\nFile: {0}".format(fileName)
         print "RBX: {0}".format(rbx)
         with open(fileName) as dataFile:
             data = json.load(dataFile)
         #pprint(data)
         
-        # Get RM Unique IDs from File and RM Objects from Database
-        readMods = ReadoutModule.objects.all()
-        qieCards = QieCard.objects.all()
+        # Get RM Unique IDs from File
         rm_uid_list = []
         rm_list = []
         rm_slot_list = []
         bridge_fw_list = []
         igloo_fw_list = []
-        rm_count = 0
-        loc_count = 0
         for i in xrange(1,5):
             b_fw = []
             i_fw = []
@@ -112,15 +116,15 @@ def main():
             print "Current Firmware"
             printRMFW(rm)
             rm_count += 1
-        return (loc_count, rm_count)
+    return (loc_count, rm_count)
     
-    else:
-        print "Please provide file name."
-        return 0
 
 if __name__ == "__main__":
-    result = main()
-    print "\nLocation Updated for {0} Readout Modules".format(result[0])
-    print "Firmware Updated for {0} Readout Modules\n".format(result[1])
+    if len(sys.argv) == 2:
+        result = process(sys.argv[1])
+        print "\nLocation Updated for {0} Readout Modules".format(result[0])
+        print "Firmware Updated for {0} Readout Modules\n".format(result[1])
+    else:
+        print "Please provide a directory containing rbx runs."
 
 

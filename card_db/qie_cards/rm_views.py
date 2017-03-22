@@ -27,11 +27,21 @@ def catalog(request):
 
     return render(request, 'readout_modules/catalog.html', {'rm_list': rms,
                                                             'total_count': count})
+
+def stats(request):
+    """ This displays readdout module statistics"""
+    rms = ReadoutModule.objects.all().order_by('rm_number')
+    count = len(rms)
+    rmCsv = "/home/django/testing_database/csv_files/RMs.csv"
+
+    return render(request, 'readout_modules/stats.html', {'rm_list': rms,
+                                                          'total_count': count,
+                                                          'rm_csv': rmCsv})
 def detail(request, rm):
     """ This displays details about a readout module """
     if len(rm) > 4:
         try:
-            readoutMod = ReadoutModule.objects.get(rm_uid__endswith=rm)
+            readoutMod = ReadoutModule.objects.get(rm_uid__endswith=rm[-3:])
         except ReadoutModule.DoesNotExist:
             #raise Http404("Readout Module uid " + str(rm) + " does not exist")
             return render(request, 'readout_modules/error.html')
@@ -54,10 +64,10 @@ def detail(request, rm):
         if len(RmLocation.objects.filter(rm=readoutMod)) < 10:
             RmLocation.objects.create(geo_loc=request.POST.get("location"), rm=readoutMod)
 
-    """ Hopefully a script will update Readout Modules every hour. """
+    """ Now a script updates Readout Module locations every hour. """
     #readoutMod.update()
-
     locations = RmLocation.objects.filter(rm=readoutMod)
+    
     try:
         biasVolts = RMBiasVoltage.objects.get(readout_module=readoutMod)
     except RMBiasVoltage.DoesNotExist:
@@ -126,17 +136,16 @@ def fieldView(request):
         item["fields"] = []
         for field in fields:
             f_list = field.split(".")
-            if field == "last location":
+            if field == "last location":    # Get RM last location
                 loc_list = locs.filter(rm=rm).order_by("date_received")
                 if len(loc_list) == 0:
                     item["fields"].append("No Locations Recorded")
                 else:
                     #item["fields"].append(len(card.location_set.all()))
                     item["fields"].append(loc_list.reverse()[0].geo_loc)
-            elif f_list[-1] == "status":
+            elif f_list[-1] == "status":    # Get QIE Card status
                 card = getattr(rm, f_list[0])
                 j = cards.index(card)
-                #item["fields"].append("how ya doin?")
                 if cardStat[j]["num_failed"] != 0:
                     item["fields"].append("FAILED")
                 elif cardStat[j]["num_passed"] == num_required:
@@ -146,14 +155,17 @@ def fieldView(request):
                         item["fields"].append("GOOD")
                 else:
                     item["fields"].append("INCOMPLETE")
-            elif field[-2:] == "fw":
+            elif field[-2:] == "fw":        # Get QIE Card firmware (bridge or igloo)
                 card = getattr(rm, f_list[0])
                 firmware = f_list[1]
-                if firmware == "b_fw":
+                if firmware == "b_fw":      # Bridge firmware
                     item["fields"].append(card.get_bridge_ver_hex())
-                elif firmware == "i_fw":
+                elif firmware == "i_fw":    # Igloo firmware
                     item["fields"].append(card.get_igloo_ver_hex())
-            else:
+            elif f_list[-1] == "uid":       # Get QIE Card unique id
+                card = getattr(rm, f_list[0])
+                item["fields"].append(card.uid)
+            else:                           # Get RM attribute: RM number, unique id, QIE Cards (1-4), comments, last location
                 item["fields"].append(getattr(rm, field))
 
         items.append(item)

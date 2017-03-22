@@ -22,11 +22,11 @@ class CatalogView(generic.ListView):
     template_name = 'qie_cards/catalog.html'
     context_object_name = 'barcode_list'
     cards = QieCard.objects.all().order_by('barcode')
-    num_cards = len(cards)
+    #num_cards = len(cards)
     def get_queryset(self):
         return self.cards
-#    def length(self):
-#        return len(self.cards)
+    def numberCards(self):
+        return len(self.cards)
 
 def catalog(request):
     """ This displays a list of all QIE cards """
@@ -346,6 +346,7 @@ def fieldView(request):
     """ This displays details about tests on a card """ 
     options = ["barcode",
                "readout_module",
+               "calibration_unit",
                "uid",
                "bridge_major_ver",
                "bridge_minor_ver",
@@ -371,6 +372,7 @@ def fieldView(request):
     infile = open(cache, "r")
     cardStat = json.load(infile)
     num_required = len(Test.objects.filter(required=True))
+    infile.close()
     
     for i in xrange(len(cards)):
         card = cards[i]

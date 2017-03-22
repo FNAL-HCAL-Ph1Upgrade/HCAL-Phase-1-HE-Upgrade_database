@@ -11,31 +11,21 @@
 {% endblock %}
 
 {% block title %}HE Readout Module Database{% endblock %}
-{% block catalog %}class="active"{% endblock %}
+{% block stats %}class="active"{% endblock %}
 
 {% block content %}
 <div class="row" align="left" style="padding-left:50px;">
 	<h3>
-        Readout Module Catalog
+        Readout Module Stats
         <div class="divider"></div>
         Number of RMs: {{total_count}}
     </h3>
     <div id="breakLine" style="height:2px;width:50%;background-color:#E74C3C"></div>
 </div>
-<br><br>
+<br>
 
 <div class="row" style="padding-left:50px;padding-right:50px">
-    <div class="splitColumns">
-      <ul>
-{% if rm_list %}
-<div class="row">
-	<div align="center"><ul>
-	{% for module in rm_list %}
-        <li style="font-size:18px"><a href={{module.rm_number}}>{{module.rm_number}}</a></li>
-	{%endfor%}
-	</ul></div>
+    <a href="https://nbay11.fnal.gov/cards/media/csv_files/RMs.csv">Download RM CSV File</a><br>
+    <a href="https://nbay11.fnal.gov/cards/media/csv_files/qieCards.csv">Download QIE Card CSV File</a>
 </div>
-{% else %}
-<h1>This database contains no readout modules.</h1>
-{% endif %}
 {% endblock %}

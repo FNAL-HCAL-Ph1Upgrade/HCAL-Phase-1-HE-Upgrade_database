@@ -1,6 +1,7 @@
-{% extends "qie_cards/base.html" %}
+{% extends "readout_modules/base.html" %}
 
 {% block title %}Field View{% endblock %}
+{% block field %}class="active"{% endblock %}
 {% block head %}
 <style>
     .forced{
@@ -42,7 +43,7 @@
   {% csrf_token %}
   <div class="row">
   {# Yay for hacky solutions! (No built in Django range function...) I like that sneaky solution. :) #}
-  {% for i in "12345" %}
+  {% for i in "123456" %}
     <div style="float:left;width:15%">
       <label for="sel{{i}}">Row {{i}} field:</label>
       <select id="sel{{i}}" class="form-control" name="field{{i}}">
