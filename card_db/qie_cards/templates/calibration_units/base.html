@@ -53,12 +53,35 @@
             {% block links %}
                 <ul class="nav navbar-nav">
                     <li {% block catalog %}{% endblock %}><a href="https://nbay11.fnal.gov/cu/catalog">Catalog</a></li> 
+                    <li {% block field-view %}{% endblock %}><a href="https://nbay11.fnal.gov/cu/field">Field View</a></li> 
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="https://nbay11.fnal.gov/admin">Admin</a></li>
                 </ul>
             {% endblock %} 
             </div>
+            <!-- Barcode Search -->
+            <form class="navbar-form navbar-left" action="#" role="search">
+              <div class="form-group">
+                <div class="input-group">
+                  <input class="form-control" id="navbarInputBarcode" type="search" placeholder="Search Barcode">
+                  <span class="input-group-btn">
+                    <button type="submit" onclick="searchBarcode(event)" class="btn"><span class="fui-search"></span></button>
+                  </span>
+                </div>
+              </div>
+            </form>
+            <!-- UID Search -->
+            <form class="navbar-form navbar-right" action="#" role="search">
+              <div class="form-group">
+                <div class="input-group">
+                  <input class="form-control" id="navbarInputUID" type="search" placeholder="Search UID">
+                  <span class="input-group-btn">
+                    <button type="submit" onclick="searchUID(event)" class="btn"><span class="fui-search"></span></button>
+                  </span>
+                </div>
+              </div>
+            </form>
         </div>
     </div>
    
@@ -78,7 +101,28 @@
 {% endblock %}
 
 {% block script %}
-
+<script>
+function searchBarcode(e){
+    cuBarcode = document.getElementById("navbarInputBarcode").value;
+    if( cuBarcode.length < 1 || cuBarcode.length > 3 ){
+        e.preventDefault();
+        document.location.href = "https://nbay11.fnal.gov/cu/error";
+    } else {
+        e.preventDefault();
+        document.location.href = "https://nbay11.fnal.gov/cu/" + cuBarcode;
+    }
+}
+function searchUID(e){
+    cuUID = document.getElementById("navbarInputUID").value;
+    if( cuUID.length != 6 ){
+        e.preventDefault();
+        document.location.href = "https://nbay11.fnal.gov/cu/error";
+    } else {
+        e.preventDefault();
+        document.location.href = "https://nbay11.fnal.gov/cu/uid/" + cuUID;
+    }
+}
+</script>
 {% endblock %}
 
 </body>

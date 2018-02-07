@@ -199,17 +199,14 @@ def detail(request, card):
             #raise Http404("QIE card with barcode " + str(card) + " does not exist")
             return render(request, 'qie_cards/error.html')
 
-    """ A script will update Readout Modules every hour. """
-    #p.update_readout_module()
-    if p.readout_module < 0:
-        rm = "Not Installed"
-    else:
-        rm = p.readout_module
+    if p.readout_module < 0:    rm = "Not Installed"
+    else:                       rm = p.readout_module
     
-    if p.readout_module_slot < 0:
-        rm_slot = "Not Installed"
-    else:
-        rm_slot = p.readout_module_slot
+    if p.readout_module_slot < 0:   rm_slot = "Not Installed"
+    else:                           rm_slot = p.readout_module_slot
+    
+    if p.calibration_unit < 0:      cu = "Not Installed"
+    else:                           cu = p.calibration_unit
 
     tests = Test.objects.all()
     locations = Location.objects.filter(card=p)
@@ -266,6 +263,7 @@ def detail(request, card):
     return render(request, 'qie_cards/detail.html', {'card': p,
                                                      'rm' : rm,
                                                      'rm_slot' : rm_slot,
+                                                     'cu' : cu,
                                                      'attempts':attempts,
                                                      'locations':locations,
                                                      'status':status,

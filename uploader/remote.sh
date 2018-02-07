@@ -48,7 +48,8 @@ echo ""
 echo -e "${STATUS}Retrieving remote files"
 
 # debug... show result directories
-echo $remoteArchive
+echo "Results location on cmshcal12: $remoteArchive"
+
 ssh $remoteHost ls -l $remoteArchive
 
 # copy json files from the remote location

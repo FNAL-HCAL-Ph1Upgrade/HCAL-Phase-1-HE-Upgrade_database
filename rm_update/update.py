@@ -21,7 +21,7 @@ for rm in ReadoutModule.objects.all():
 # Update Calibration Unit QIE Cards in db
 cu_dict = {}
 for cu in CalibrationUnit.objects.all():
-    cu.update_qie_card()
+    cu.update()
     cu_dict[cu.cu_number] = cu.qie_card.get_uid_mac_simple()
 
 # Output Readout Module json file

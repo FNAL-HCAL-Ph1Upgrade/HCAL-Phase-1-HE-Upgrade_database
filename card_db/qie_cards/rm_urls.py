@@ -10,6 +10,5 @@ urlpatterns = [
     url(r'^(?P<rm>[0-9]{1,4})/$', views.detail, name='detail'),
     url(r'^uid/(?P<rm>[a-fA-F0-9_]{6,27})/$', views.detail, name='detail'),
     url(r'^field$', views.fieldView, name='field'),
-    url(r'^stats$', views.stats, name='stats'),
     url(r'^error$', views.error, name='error'),
     ]

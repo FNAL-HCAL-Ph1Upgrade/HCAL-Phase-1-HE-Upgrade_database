@@ -79,6 +79,12 @@ table, td, th {
             <td>Slot {{rm_slot}}</td>
         </tr>
         <tr>
+            <td>Calibration Unit</td>
+            <!-- <td>{{cu}}<span style="display:inline-block; width:30px"></span><a href="https://nbay11.fnal.gov/cu/{{cu}}">[link to CU]</a></td> -->
+            <td><a href="https://nbay11.fnal.gov/cu/{{cu}}">{{cu}}</a></td>
+            <td></td>
+        </tr>
+        <tr>
             <td>Unique ID:</td>
             <td>{{card.get_uid_mac}}</td>
             <td>({{card.get_uid_split}})</td>

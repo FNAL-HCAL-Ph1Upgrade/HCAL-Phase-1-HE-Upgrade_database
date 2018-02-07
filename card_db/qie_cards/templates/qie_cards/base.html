@@ -58,17 +58,17 @@
             {% block links %}
                 <ul class="nav navbar-nav">
                     <li {% block catalog %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/catalog">Catalog</a></li>
+                    <li {% block field-view %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/field">Field View</a></li>
                     <li {% block summary %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/summary">Summary</a></li>
-                    <li {% block testers %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/testers">Testers</a></li>
-                    <li {% block test-details %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/test-details">Test Details</a></li>
+                    <li {% block stats %}{% endblock %}><a href="https://nbay11.fnal.gov/cards/stats">Stats</a></li>
                     <li>
                         <a href= "" class="dropdown-toggle" data-toggle="dropdown">More<span class="caret"></span>
                         </a>
                         <span class="dropdown-arrow dropdown-arrow-inverse"></span>
                         <ul class="dropdown-menu" style="background-color: #2c3e50">
-                            <li style="background-color: #34495e"><a href="https://nbay11.fnal.gov/cards/stats">Stats</a></li>
                             <li style="background-color: #34495e"><a href="https://nbay11.fnal.gov/cards/plots">Plots</a></li>
-                            <li style="background-color: #34495e"><a href="https://nbay11.fnal.gov/cards/field">Field View</a></li>
+                            <li style="background-color: #34495e"><a href="https://nbay11.fnal.gov/cards/testers">Testers</a></li>
+                            <li style="background-color: #34495e"><a href="https://nbay11.fnal.gov/cards/test-details">Test Details</a></li>
                         </ul>
                     </li>
                 </ul>

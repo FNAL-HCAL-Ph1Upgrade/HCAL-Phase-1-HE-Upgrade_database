@@ -434,6 +434,7 @@ class CalibrationUnit(models.Model):
     date        = models.DateTimeField('Date of Assembly', default=timezone.now)                                # Date of assembly
     place       = models.CharField('Location of Assembly', max_length=50, default="")                           # Location of assembly
     cu_number   = models.IntegerField('Calibration Unit №', default=-1)                                         # CU number
+    cu_uid      = models.CharField(max_length=6, blank=True, default="")                                        # The CU UID created from the UID of the QIE card in the CU 
     qie_card    = models.ForeignKey(QieCard, verbose_name='QIE Card №', on_delete=models.PROTECT)               # QIE Card installed in CU, barcode 0601XXX
     qie_adapter      = models.IntegerField('QIE Adapter №', default=-1)                                         # QIE adapter number
     pulser_board     = models.IntegerField('Pulser Board №', default=-1)                                        # Pulser board installed in CU
@@ -452,9 +453,11 @@ class CalibrationUnit(models.Model):
     upload           = models.FileField('QC Data File', upload_to='cu_calibration/', default='default.png')     # Uploaded Quality Control data file for CU
     comments         = models.TextField(max_length=MAX_COMMENT_LENGTH, blank=True, default="")                  # Comments for a Calibration Unit
 
-    def update_qie_card(self):
+    def update(self):
         self.qie_card.calibration_unit = self.cu_number
+        self.cu_uid = self.qie_card.get_uid_mac_simple()
         self.qie_card.save()
+        self.save()
 
     def get_location(self):
         c_loc = CuLocation.objects.filter(cu=self).order_by("date_received")
@@ -474,10 +477,8 @@ class SipmControlCard(models.Model):
     upload             = models.FileField('Calibration Data File', upload_to='sipm_control_card', default='default.png')
 
     def get_rm(self):
-        if self.rm_number > 0:
-            return self.rm_number
-        else:
-            return "Not Installed"
+        if self.rm_number > 0:  return self.rm_number
+        else:                   return "Not Installed"
 
     def get_calibration_data(self):
         data = []

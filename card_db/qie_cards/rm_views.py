@@ -28,24 +28,15 @@ def catalog(request):
     return render(request, 'readout_modules/catalog.html', {'rm_list': rms,
                                                             'total_count': count})
 
-def stats(request):
-    """ This displays readdout module statistics"""
-    rms = ReadoutModule.objects.all().order_by('rm_number')
-    count = len(rms)
-    rmCsv = "/home/django/testing_database/csv_files/RMs.csv"
-
-    return render(request, 'readout_modules/stats.html', {'rm_list': rms,
-                                                          'total_count': count,
-                                                          'rm_csv': rmCsv})
 def detail(request, rm):
     """ This displays details about a readout module """
-    if len(rm) > 4:
+    if len(rm) > 4: # rm must be the unique id
         try:
             readoutMod = ReadoutModule.objects.get(rm_uid__endswith=rm[-3:])
         except ReadoutModule.DoesNotExist:
             #raise Http404("Readout Module uid " + str(rm) + " does not exist")
             return render(request, 'readout_modules/error.html')
-    else:
+    else:           # rm must be the barcode
         try:
             readoutMod = ReadoutModule.objects.get(rm_number=rm)
         except ReadoutModule.DoesNotExist:
@@ -84,7 +75,7 @@ def error(request):
     return render(request, 'readout_modules/error.html')
 
 def fieldView(request):
-    """ This displays details about tests on a card """ 
+    """ This displays RM field data. """
     options = ["rm_number",
                "rm_uid",
                "card_1",
