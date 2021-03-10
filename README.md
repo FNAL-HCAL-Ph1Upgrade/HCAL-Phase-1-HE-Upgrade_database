@@ -2,7 +2,7 @@
 A web-framework for the CMS HE Phase 1 Upgrade database.
 Initial QIE Card testing was performed at Fermilab, Summer 2016. QIE stands for "charge integrator and encoder."
 Readout Modules (RM) and Calibration Units (CU) were assembled at CERN, Fall 2016.
-* New website: The website will be hosted at Baylor... once done, the new URL can be posted here. (FIXME)
+* New website: http://hep.baylor.edu/he/cards/catalog
 * Old website: https://nbay11.fnal.gov/he/cards/catalog
 * Username/password: Please email Jay Dittmann (Jay_Dittmann@baylor.edu) to request access.
 * Questions: Contact Jay Dittmann (Jay_Dittmann@baylor.edu)
